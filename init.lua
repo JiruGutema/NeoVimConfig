@@ -67,6 +67,7 @@ vim.cmd("colorscheme vscode")
 vim.opt.number = true
 vim.opt.cursorline = true
 vim.opt.signcolumn = "yes"
+vim.opt.relativenumber = true
 
 -----------------------------------------------------------
 -- Keymaps
