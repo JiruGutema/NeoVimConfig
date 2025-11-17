@@ -54,6 +54,25 @@ require("lazy").setup({
 
   -- Smooth scrolling
   { "karb94/neoscroll.nvim", event = "WinScrolled" },
+{
+    "Pocco81/auto-save.nvim",
+    config = function()
+        require("auto-save").setup({
+            enabled = true,
+            execution_message = {
+                message = "File saved automatically",
+                dim = 0.18,
+            },
+            trigger_events = {"InsertLeave", "TextChanged"},
+            conditions = {
+                exists = true,
+                filetype_is_not = {},
+                modifiable = true,
+            },
+            write_all_buffers = false,
+        })
+    end
+},
 })
 
 -----------------------------------------------------------
@@ -233,6 +252,25 @@ require("neoscroll").setup({
   easing_function = "cubic",
   hide_cursor = true,
 })
+
+-----------------------------------------------------------
+-- Auto Save
+-----------------------------------------------------------
+require("auto-save").setup({
+    enabled = true,
+    execution_message = {
+        message = "File saved automatically",
+        dim = 0.18,
+    },
+    trigger_events = {"InsertLeave", "TextChanged"},
+    conditions = {
+        exists = true,
+        filetype_is_not = {},
+        modifiable = true,
+    },
+    write_all_buffers = false,
+})
+
 
 -----------------------------------------------------------
 -- Format on Save
