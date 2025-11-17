@@ -1,8 +1,8 @@
 -----------------------------------------------------------
 -- Set Leader Key
 -----------------------------------------------------------
-vim.g.mapleader = " "      -- Space as leader
-vim.g.maplocalleader = " " -- Local leader
+vim.g.mapleader = " "
+vim.g.maplocalleader = " "
 
 -----------------------------------------------------------
 -- Bootstrap Lazy.nvim
@@ -12,6 +12,7 @@ if not vim.loop.fs_stat(lazypath) then
   vim.fn.system({
     "git", "clone", "--filter=blob:none",
     "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
     lazypath,
   })
 end
@@ -21,7 +22,6 @@ vim.opt.rtp:prepend(lazypath)
 -- Plugins
 -----------------------------------------------------------
 require("lazy").setup({
-
   -- Theme
   { "Mofiqul/vscode.nvim" },
 
@@ -29,7 +29,7 @@ require("lazy").setup({
   { "nvim-tree/nvim-tree.lua" },
   { "nvim-tree/nvim-web-devicons" },
 
-  -- Telescope (Fuzzy Finder)
+  -- Telescope
   { "nvim-telescope/telescope.nvim", tag = "0.1.5", dependencies = { "nvim-lua/plenary.nvim" } },
 
   -- LSP + Mason
@@ -50,32 +50,10 @@ require("lazy").setup({
   { "lewis6991/gitsigns.nvim" },
 
   -- Autopairs
-  { "windwp/nvim-autopairs", config = function()
-      require("nvim-autopairs").setup{
-          check_ts = true,
-          disable_filetype = { "TelescopePrompt", "vim" },
-          fast_wrap = { 
-              map = "<M-e>",
-              chars = { "{", "[", "(", '"', "'" },
-              pattern = [=[[%'%"%)%>%]%)%}%,]]=],
-              offset = 0,
-              end_key = "$",
-              keys = "qwertyuiopzxcvbnmasdfghjkl",
-              check_comma = true,
-              highlight = "Search",
-              highlight_grey = "Comment"
-          },
-      }
-  end},
+  { "windwp/nvim-autopairs" },
 
   -- Smooth scrolling
-  { "karb94/neoscroll.nvim", event = "WinScrolled", config = function()
-      require('neoscroll').setup({
-        easing_function = "cubic",
-        hide_cursor = true,
-      })
-  end},
-
+  { "karb94/neoscroll.nvim", event = "WinScrolled" },
 })
 
 -----------------------------------------------------------
@@ -84,9 +62,15 @@ require("lazy").setup({
 vim.cmd("colorscheme vscode")
 
 -----------------------------------------------------------
+-- General Settings
+-----------------------------------------------------------
+vim.opt.number = true
+vim.opt.cursorline = true
+vim.opt.signcolumn = "yes"
+
+-----------------------------------------------------------
 -- Keymaps
 -----------------------------------------------------------
--- jj to escape
 vim.keymap.set('i', 'jj', '<Esc>', { noremap = true, silent = true })
 vim.keymap.set('t', 'jj', '<C-\\><C-n>', { noremap = true, silent = true })
 
@@ -94,84 +78,86 @@ vim.keymap.set('t', 'jj', '<C-\\><C-n>', { noremap = true, silent = true })
 vim.keymap.set("n", "<C-p>", ":Telescope find_files<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-f>", ":Telescope live_grep<CR>", { noremap = true, silent = true })
 
--- Smooth half-page scroll with recenter
+-- Smooth half-page scroll + recenter
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true })
 
--- Toggle Nvim-Tree (leader + n)
+-- Nvim-Tree toggle
 vim.keymap.set("n", "<leader>n", function()
     require("nvim-tree.api").tree.toggle({ find_file = true })
 end, { noremap = true, silent = true })
 
--- Format file using LSP
+-- Format with LSP
 vim.keymap.set("n", "<C-S-i>", function()
     vim.lsp.buf.format({ async = true })
 end, { noremap = true, silent = true })
 
+-- Enable clipboard support (copy/paste with system clipboard)
+vim.opt.clipboard = "unnamedplus"   -- Linux/Wayland/WSL
 -----------------------------------------------------------
 -- Nvim-Tree
 -----------------------------------------------------------
 require("nvim-tree").setup({
-  update_focused_file = {
-    enable = true,
-    update_cwd = true,
-  },
+  update_focused_file = { enable = true, update_cwd = true },
   view = { width = 30, side = "left" },
 })
 
 -----------------------------------------------------------
--- Mason LSP Installer
+-- Mason
 -----------------------------------------------------------
 require("mason").setup()
 require("mason-lspconfig").setup({
   ensure_installed = {
-    "tsserver",   -- TypeScript / JavaScript / React / Next
-    "html",
-    "cssls",
-    "jsonls",
-    "lua_ls",
-    "pyright",
-    "gopls",
-    "omnisharp",  -- C#
-    "jdtls",      -- Java
-  }
+    "ts_ls", "html", "cssls", "jsonls", "lua_ls",
+    "pyright", "gopls", "omnisharp", "jdtls"
+  },
+  automatic_installation = true,
 })
 
 -----------------------------------------------------------
--- LSP + Autocomplete
+-- LSP Configuration (New 2025+ way - no more deprecated require("lspconfig"))
 -----------------------------------------------------------
-local lspconfig = require("lspconfig")
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
--- tsserver for React/Next
-lspconfig.tsserver.setup{
+vim.lsp.config("ts_ls", {
   capabilities = capabilities,
   filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
-  root_dir = lspconfig.util.root_pattern("package.json", "tsconfig.json", ".git")
-}
+  root_dir = vim.fs.root(0, { "package.json", "tsconfig.json", ".git" }),
+})
+vim.lsp.config("html",     { capabilities = capabilities })
+vim.lsp.config("cssls",    { capabilities = capabilities })
+vim.lsp.config("jsonls",   { capabilities = capabilities })
 
--- Other LSPs
-lspconfig.html.setup({ capabilities = capabilities })
-lspconfig.cssls.setup({ capabilities = capabilities })
-lspconfig.jsonls.setup({ capabilities = capabilities })
-lspconfig.lua_ls.setup({ capabilities = capabilities })
-lspconfig.pyright.setup({ capabilities = capabilities })
-lspconfig.gopls.setup({ capabilities = capabilities })
-lspconfig.omnisharp.setup({ capabilities = capabilities })
-lspconfig.jdtls.setup({ capabilities = capabilities })
+vim.lsp.config("lua_ls", {
+  capabilities = capabilities,
+  settings = {
+    Lua = {
+      diagnostics = { globals = { "vim" } },
+      workspace = { library = vim.api.nvim_get_runtime_file("", true) },
+    },
+  },
+})
+
+vim.lsp.config("pyright",  { capabilities = capabilities })
+vim.lsp.config("gopls",    { capabilities = capabilities })
+vim.lsp.config("omnisharp",{
+  capabilities = capabilities,
+  cmd = { "omnisharp" },
+})
+vim.lsp.config("jdtls",    { capabilities = capabilities })
 
 -----------------------------------------------------------
--- nvim-cmp Autocomplete
+-- nvim-cmp
 -----------------------------------------------------------
 local cmp = require("cmp")
 local cmp_autopairs = require('nvim-autopairs.completion.cmp')
-cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+cmp.event:on("confirm_done", cmp_autopairs.on_confirm_done())
 
 cmp.setup({
   mapping = {
-    ["<Tab>"] = cmp.mapping.select_next_item(),
+    ["<Tab>"]   = cmp.mapping.select_next_item(),
     ["<S-Tab>"] = cmp.mapping.select_prev_item(),
-    ["<CR>"] = cmp.mapping.confirm({ select = true }),
+    ["<CR>"]    = cmp.mapping.confirm({ select = true }),
   },
   sources = {
     { name = "nvim_lsp" },
@@ -181,22 +167,49 @@ cmp.setup({
 })
 
 -----------------------------------------------------------
--- Lualine Statusline
+-- Autopairs
 -----------------------------------------------------------
-require("lualine").setup({
-  options = { theme = "vscode" }
+require("nvim-autopairs").setup({
+  check_ts = true,
+  disable_filetype = { "TelescopePrompt", "vim" },
+  fast_wrap = {
+    map = "<M-e>",
+    chars = { "{", "[", "(", '"', "'" },
+    pattern = [=[[%'%"%)%>%]%)%}%,]]=],
+    offset = 0,
+    end_key = "$",
+    keys = "qwertyuiopzxcvbnmasdfghjkl",
+    check_comma = true,
+    highlight = "Search",
+    highlight_grey = "Comment",
+  },
 })
 
 -----------------------------------------------------------
--- Git Signs
+-- Lualine
+-----------------------------------------------------------
+require("lualine").setup({
+  options = { theme = "vscode" },
+})
+
+-----------------------------------------------------------
+-- Gitsigns
 -----------------------------------------------------------
 require("gitsigns").setup()
+
+-----------------------------------------------------------
+-- Neoscroll
+-----------------------------------------------------------
+require("neoscroll").setup({
+  easing_function = "cubic",
+  hide_cursor = true,
+})
 
 -----------------------------------------------------------
 -- Format on Save
 -----------------------------------------------------------
 vim.api.nvim_create_autocmd("BufWritePre", {
-  pattern = {"*.py", "*.ts", "*.js", "*.jsx", "*.go", "*.lua", "*.cs", "*.java"},
+  pattern = { "*.py", "*.ts", "*.tsx", "*.js", "*.jsx", "*.go", "*.lua", "*.cs", "*.java" },
   callback = function()
     vim.lsp.buf.format({ async = false })
   end,
