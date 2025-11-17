@@ -101,7 +101,35 @@ require("nvim-tree").setup({
   update_focused_file = { enable = true, update_cwd = true },
   view = { width = 30, side = "left" },
 })
+-----------------------------------------------------------
+-- Smart C-h / C-l : switch between NvimTree and editor
+-----------------------------------------------------------
+local function smart_window_nav(key)
+  local current_win = vim.api.nvim_get_current_win()
+  local tree_win = require("nvim-tree.api").tree.winid()  -- Fixed: renamed from get_tree_winid()
 
+  if tree_win and vim.api.nvim_win_is_valid(tree_win) then
+    local is_in_tree = current_win == tree_win
+    if is_in_tree and (key == "h" or key == "l") then
+      -- We are in NvimTree → go to the previous (code) window
+      vim.cmd("wincmd p")
+    else
+      -- We are not in NvimTree → go to NvimTree
+      require("nvim-tree.api").tree.focus()
+    end
+  else
+    -- Fallback: normal window navigation if tree is closed
+    vim.cmd("wincmd " .. key)
+  end
+end
+
+-- Ctrl+h and Ctrl+l in Normal mode
+vim.keymap.set("n", "<C-h>", function() smart_window_nav("h") end, { desc = "Focus NvimTree or left window" })
+vim.keymap.set("n", "<C-l>", function() smart_window_nav("l") end, { desc = "Focus editor from NvimTree or right window" })
+
+-- Optional: also make it work from Terminal and other buffers
+vim.keymap.set("t", "<C-h>", "<C-\\><C-n><C-h>", { desc = "Terminal → left" })
+vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-l>", { desc = "Terminal → right" })
 -----------------------------------------------------------
 -- Mason
 -----------------------------------------------------------
