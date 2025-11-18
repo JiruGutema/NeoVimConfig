@@ -1,8 +1,9 @@
 -----------------------------------------------------------
--- Set Leader Key
+-- Set Leader Key & Clipboard
 -----------------------------------------------------------
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
+vim.opt.clipboard = "unnamedplus"   -- System clipboard (Linux/WSL)
 
 -----------------------------------------------------------
 -- Bootstrap Lazy.nvim
@@ -22,71 +23,45 @@ vim.opt.rtp:prepend(lazypath)
 -- Plugins
 -----------------------------------------------------------
 require("lazy").setup({
-  -- Theme
   { "Mofiqul/vscode.nvim" },
-
-  -- File Explorer + Icons
   { "nvim-tree/nvim-tree.lua" },
   { "nvim-tree/nvim-web-devicons" },
-
-  -- Telescope
   { "nvim-telescope/telescope.nvim", tag = "0.1.5", dependencies = { "nvim-lua/plenary.nvim" } },
-
-  -- LSP + Mason
   { "neovim/nvim-lspconfig" },
   { "williamboman/mason.nvim" },
   { "williamboman/mason-lspconfig.nvim" },
-
-  -- Autocomplete
   { "hrsh7th/nvim-cmp" },
   { "hrsh7th/cmp-nvim-lsp" },
   { "hrsh7th/cmp-buffer" },
   { "hrsh7th/cmp-path" },
-
-  -- Statusline
   { "nvim-lualine/lualine.nvim" },
-
-  -- Git signs
   { "lewis6991/gitsigns.nvim" },
-
-  -- Autopairs
   { "windwp/nvim-autopairs" },
-
-  -- Smooth scrolling
   { "karb94/neoscroll.nvim", event = "WinScrolled" },
-{
-    "Pocco81/auto-save.nvim",
+  { "Pocco81/auto-save.nvim" },
+
+  -- GitHub Copilot (official, fastest, 2025)
+  {
+    "github/copilot.vim",
+    event = "InsertEnter",
     config = function()
-        require("auto-save").setup({
-            enabled = true,
-            execution_message = {
-                message = "File saved automatically",
-                dim = 0.18,
-            },
-            trigger_events = {"InsertLeave", "TextChanged"},
-            conditions = {
-                exists = true,
-                filetype_is_not = {},
-                modifiable = true,
-            },
-            write_all_buffers = false,
-        })
-    end
-},
+      vim.g.copilot_no_tab_map = true
+      vim.keymap.set("i", "<C-J>", 'copilot#Accept("\\<CR>")', { expr = true, silent = true })
+      vim.keymap.set("i", "<C-]>", "<Plug>(copilot-next)",     { silent = true })
+      vim.keymap.set("i", "<C-[>", "<Plug>(copilot-previous)", { silent = true })
+      vim.keymap.set("i", "<C-\\>", "<Plug>(copilot-dismiss)", { silent = true })
+    end,
+  },
 })
 
 -----------------------------------------------------------
--- Appearance
+-- Appearance & General Settings
 -----------------------------------------------------------
 vim.cmd("colorscheme vscode")
-
------------------------------------------------------------
--- General Settings
------------------------------------------------------------
 vim.opt.number = true
+vim.opt.relativenumber = true
 vim.opt.cursorline = true
 vim.opt.signcolumn = "yes"
-vim.opt.relativenumber = true
 
 -----------------------------------------------------------
 -- Keymaps
@@ -98,49 +73,49 @@ vim.keymap.set('t', 'jj', '<C-\\><C-n>', { noremap = true, silent = true })
 vim.keymap.set("n", "<C-p>", ":Telescope find_files<CR>", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-f>", ":Telescope live_grep<CR>", { noremap = true, silent = true })
 
--- Smooth half-page scroll + recenter
+-- Smooth scrolling
 vim.keymap.set("n", "<C-d>", "<C-d>zz", { noremap = true, silent = true })
 vim.keymap.set("n", "<C-u>", "<C-u>zz", { noremap = true, silent = true })
 
 -- Nvim-Tree toggle
 vim.keymap.set("n", "<leader>n", function()
-    require("nvim-tree.api").tree.toggle({ find_file = true })
+  require("nvim-tree.api").tree.toggle({ find_file = true })
 end, { noremap = true, silent = true })
 
--- Move line up/down (NORMAL mode)
+-- Move lines
 vim.keymap.set("n", "<A-Down>", ":m .+1<CR>==", { noremap = true, silent = true })
-vim.keymap.set("n", "<A-Up>", ":m .-2<CR>==", { noremap = true, silent = true })
-
--- Move selected block up/down (VISUAL mode)
+vim.keymap.set("n", "<A-Up>",   ":m .-2<CR>==", { noremap = true, silent = true })
 vim.keymap.set("v", "<A-Down>", ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
-vim.keymap.set("v", "<A-Up>", ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
-
--- Move line up/down (INSERT mode)
+vim.keymap.set("v", "<A-Up>",   ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
 vim.keymap.set("i", "<A-Down>", "<Esc>:m .+1<CR>==gi", { noremap = true, silent = true })
-vim.keymap.set("i", "<A-Up>", "<Esc>:m .-2<CR>==gi", { noremap = true, silent = true })
+vim.keymap.set("i", "<A-Up>",   "<Esc>:m .-2<CR>==gi", { noremap = true, silent = true })
 
-
------------------------------------------------------------
--- Duplicate Line (VS Code: Shift + Alt + ↑ / ↓)
------------------------------------------------------------
-
--- NORMAL mode
+-- Duplicate lines (VS Code style)
 vim.keymap.set("n", "<S-A-Down>", "yyp", { noremap = true, silent = true })
-vim.keymap.set("n", "<S-A-Up>", "yyP", { noremap = true, silent = true })
-
--- VISUAL mode (duplicate selected block)
+vim.keymap.set("n", "<S-A-Up>",   "yyP", { noremap = true, silent = true })
 vim.keymap.set("v", "<S-A-Down>", "ygv'>p", { noremap = true, silent = true })
-vim.keymap.set("v", "<S-A-Up>", "ygv'<P", { noremap = true, silent = true })
+vim.keymap.set("v", "<S-A-Up>",   "ygv'<P", { noremap = true, silent = true })
 
+-- Format
+vim.keymap.set("n", "<C-S-i>", function() vim.lsp.buf.format({ async = true }) end, { noremap = true, silent = true })
 
+-- Smart Ctrl+h / Ctrl+l (explorer ↔ editor)
+local function smart_nav(key)
+  local cur = vim.api.nvim_get_current_win()
+  local tree_win = require("nvim-tree.api").tree.winid()
+  if tree_win and vim.api.nvim_win_is_valid(tree_win) then
+    if cur == tree_win then
+      vim.cmd("wincmd p")           -- in tree → go back to editor
+    else
+      require("nvim-tree.api").tree.focus()  -- in editor → go to tree
+    end
+  else
+    vim.cmd("wincmd " .. key)       -- fallback
+  end
+end
+vim.keymap.set("n", "<C-h>", function() smart_nav("h") end)
+vim.keymap.set("n", "<C-l>", function() smart_nav("l") end)
 
--- Format with LSP
-vim.keymap.set("n", "<C-S-i>", function()
-    vim.lsp.buf.format({ async = true })
-end, { noremap = true, silent = true })
-
--- Enable clipboard support (copy/paste with system clipboard)
-vim.opt.clipboard = "unnamedplus"   -- Linux/Wayland/WSL
 -----------------------------------------------------------
 -- Nvim-Tree
 -----------------------------------------------------------
@@ -148,50 +123,16 @@ require("nvim-tree").setup({
   update_focused_file = { enable = true, update_cwd = true },
   view = { width = 30, side = "left" },
 })
------------------------------------------------------------
--- Smart C-h / C-l : switch between NvimTree and editor
------------------------------------------------------------
-local function smart_window_nav(key)
-  local current_win = vim.api.nvim_get_current_win()
-  local tree_win = require("nvim-tree.api").tree.winid()  -- Fixed: renamed from get_tree_winid()
 
-  if tree_win and vim.api.nvim_win_is_valid(tree_win) then
-    local is_in_tree = current_win == tree_win
-    if is_in_tree and (key == "h" or key == "l") then
-      -- We are in NvimTree → go to the previous (code) window
-      vim.cmd("wincmd p")
-    else
-      -- We are not in NvimTree → go to NvimTree
-      require("nvim-tree.api").tree.focus()
-    end
-  else
-    -- Fallback: normal window navigation if tree is closed
-    vim.cmd("wincmd " .. key)
-  end
-end
-
--- Ctrl+h and Ctrl+l in Normal mode
-vim.keymap.set("n", "<C-h>", function() smart_window_nav("h") end, { desc = "Focus NvimTree or left window" })
-vim.keymap.set("n", "<C-l>", function() smart_window_nav("l") end, { desc = "Focus editor from NvimTree or right window" })
-
--- Optional: also make it work from Terminal and other buffers
-vim.keymap.set("t", "<C-h>", "<C-\\><C-n><C-h>", { desc = "Terminal → left" })
-vim.keymap.set("t", "<C-l>", "<C-\\><C-n><C-l>", { desc = "Terminal → right" })
 -----------------------------------------------------------
--- Mason
+-- Mason & LSP (2025+ way)
 -----------------------------------------------------------
 require("mason").setup()
 require("mason-lspconfig").setup({
-  ensure_installed = {
-    "ts_ls", "html", "cssls", "jsonls", "lua_ls",
-    "pyright", "gopls", "omnisharp", "jdtls"
-  },
+  ensure_installed = { "ts_ls", "html", "cssls", "jsonls", "lua_ls", "pyright", "gopls", "omnisharp", "jdtls" },
   automatic_installation = true,
 })
 
------------------------------------------------------------
--- LSP Configuration (New 2025+ way - no more deprecated require("lspconfig"))
------------------------------------------------------------
 local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
 vim.lsp.config("ts_ls", {
@@ -199,27 +140,14 @@ vim.lsp.config("ts_ls", {
   filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
   root_dir = vim.fs.root(0, { "package.json", "tsconfig.json", ".git" }),
 })
-vim.lsp.config("html",     { capabilities = capabilities })
-vim.lsp.config("cssls",    { capabilities = capabilities })
-vim.lsp.config("jsonls",   { capabilities = capabilities })
-
-vim.lsp.config("lua_ls", {
-  capabilities = capabilities,
-  settings = {
-    Lua = {
-      diagnostics = { globals = { "vim" } },
-      workspace = { library = vim.api.nvim_get_runtime_file("", true) },
-    },
-  },
-})
-
-vim.lsp.config("pyright",  { capabilities = capabilities })
-vim.lsp.config("gopls",    { capabilities = capabilities })
-vim.lsp.config("omnisharp",{
-  capabilities = capabilities,
-  cmd = { "omnisharp" },
-})
-vim.lsp.config("jdtls",    { capabilities = capabilities })
+vim.lsp.config("html",      { capabilities = capabilities })
+vim.lsp.config("cssls",     { capabilities = capabilities })
+vim.lsp.config("jsonls",    { capabilities = capabilities })
+vim.lsp.config("lua_ls",    { capabilities = capabilities, settings = { Lua = { diagnostics = { globals = { "vim" } }, workspace = { library = vim.api.nvim_get_runtime_file("", true) } } } })
+vim.lsp.config("pyright",   { capabilities = capabilities })
+vim.lsp.config("gopls",     { capabilities = capabilities })
+vim.lsp.config("omnisharp", { capabilities = capabilities, cmd = { "omnisharp" } })
+vim.lsp.config("jdtls",     { capabilities = capabilities })
 
 -----------------------------------------------------------
 -- nvim-cmp
@@ -242,69 +170,30 @@ cmp.setup({
 })
 
 -----------------------------------------------------------
--- Autopairs
+-- Autopairs, Lualine, Gitsigns, Neoscroll
 -----------------------------------------------------------
 require("nvim-autopairs").setup({
   check_ts = true,
   disable_filetype = { "TelescopePrompt", "vim" },
-  fast_wrap = {
-    map = "<M-e>",
-    chars = { "{", "[", "(", '"', "'" },
-    pattern = [=[[%'%"%)%>%]%)%}%,]]=],
-    offset = 0,
-    end_key = "$",
-    keys = "qwertyuiopzxcvbnmasdfghjkl",
-    check_comma = true,
-    highlight = "Search",
-    highlight_grey = "Comment",
-  },
 })
-
------------------------------------------------------------
--- Lualine
------------------------------------------------------------
-require("lualine").setup({
-  options = { theme = "vscode" },
-})
-
------------------------------------------------------------
--- Gitsigns
------------------------------------------------------------
+require("lualine").setup({ options = { theme = "vscode" } })
 require("gitsigns").setup()
+require("neoscroll").setup({ easing_function = "cubic", hide_cursor = true })
 
 -----------------------------------------------------------
--- Neoscroll
------------------------------------------------------------
-require("neoscroll").setup({
-  easing_function = "cubic",
-  hide_cursor = true,
-})
-
------------------------------------------------------------
--- Auto Save
+-- Auto-save
 -----------------------------------------------------------
 require("auto-save").setup({
-    enabled = true,
-    execution_message = {
-        message = "File saved automatically",
-        dim = 0.18,
-    },
-    trigger_events = {"InsertLeave", "TextChanged"},
-    conditions = {
-        exists = true,
-        filetype_is_not = {},
-        modifiable = true,
-    },
-    write_all_buffers = false,
+  enabled = true,
+  execution_message = { message = "Auto-saved", dim = 0.18 },
+  trigger_events = { "InsertLeave", "TextChanged" },
+  write_all_buffers = false,
 })
-
 
 -----------------------------------------------------------
 -- Format on Save
 -----------------------------------------------------------
 vim.api.nvim_create_autocmd("BufWritePre", {
   pattern = { "*.py", "*.ts", "*.tsx", "*.js", "*.jsx", "*.go", "*.lua", "*.cs", "*.java" },
-  callback = function()
-    vim.lsp.buf.format({ async = false })
-  end,
+  callback = function() vim.lsp.buf.format({ async = false }) end,
 })
