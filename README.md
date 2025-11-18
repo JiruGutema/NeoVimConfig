@@ -1,6 +1,8 @@
 # Neovim Configuration 
 
-A clean, fast, and modern Neovim setup designed to feel familiar to VS Code users while delivering superior performance. Built entirely in Lua using Lazy.nvim as the plugin manager.
+A clean, fast, and modern vscode like Neovim setup designed to feel familiar to VS Code users while delivering superior performance. Built entirely in Lua using Lazy.nvim as the plugin manager.
+<img width="1911" height="1045" alt="image" src="https://github.com/user-attachments/assets/ec939312-6e70-4ca4-91a7-304318724310" />
+
 
 ## Features
 
