@@ -107,6 +107,33 @@ vim.keymap.set("n", "<leader>n", function()
     require("nvim-tree.api").tree.toggle({ find_file = true })
 end, { noremap = true, silent = true })
 
+-- Move line up/down (NORMAL mode)
+vim.keymap.set("n", "<A-Down>", ":m .+1<CR>==", { noremap = true, silent = true })
+vim.keymap.set("n", "<A-Up>", ":m .-2<CR>==", { noremap = true, silent = true })
+
+-- Move selected block up/down (VISUAL mode)
+vim.keymap.set("v", "<A-Down>", ":m '>+1<CR>gv=gv", { noremap = true, silent = true })
+vim.keymap.set("v", "<A-Up>", ":m '<-2<CR>gv=gv", { noremap = true, silent = true })
+
+-- Move line up/down (INSERT mode)
+vim.keymap.set("i", "<A-Down>", "<Esc>:m .+1<CR>==gi", { noremap = true, silent = true })
+vim.keymap.set("i", "<A-Up>", "<Esc>:m .-2<CR>==gi", { noremap = true, silent = true })
+
+
+-----------------------------------------------------------
+-- Duplicate Line (VS Code: Shift + Alt + ↑ / ↓)
+-----------------------------------------------------------
+
+-- NORMAL mode
+vim.keymap.set("n", "<S-A-Down>", "yyp", { noremap = true, silent = true })
+vim.keymap.set("n", "<S-A-Up>", "yyP", { noremap = true, silent = true })
+
+-- VISUAL mode (duplicate selected block)
+vim.keymap.set("v", "<S-A-Down>", "ygv'>p", { noremap = true, silent = true })
+vim.keymap.set("v", "<S-A-Up>", "ygv'<P", { noremap = true, silent = true })
+
+
+
 -- Format with LSP
 vim.keymap.set("n", "<C-S-i>", function()
     vim.lsp.buf.format({ async = true })
