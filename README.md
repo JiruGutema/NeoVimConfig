@@ -2,6 +2,8 @@
 
 A clean, fast, and modern vscode like Neovim setup designed to feel familiar to VS Code users while delivering superior performance. 
 Built entirely in Lua using Lazy.nvim as the plugin manager.
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f9d6f281-28f4-47ad-a6f9-c482618ee94e" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/faa5edf9-5339-4454-82ad-0f7fabd1c3f0" />
 
 ## Installation
 
