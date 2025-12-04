@@ -6,11 +6,6 @@ return {
         preset = "ivy",
         hidden = { "input" },
       },
-    },
-    explorer = {
-      layout = {
-        hidden = { "input" },
-      },
-    },
+    }
   },
 }
